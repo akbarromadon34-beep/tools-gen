@@ -1,60 +1,131 @@
 
-<div class="cookie-upload">
-  <label for="cookieFile"><strong>Import Cookie File (.txt)</strong></label>
-  <input
-    type="file"
-    id="cookieFile"
-    accept=".txt,text/plain"
-  />
-  <p id="fileStatus">Belum ada file yang dipilih.</p>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Access Link Builder</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;padding:24px 14px;
+  background:#f3f5f9;color:#202332;
+  font-family:Arial,sans-serif
+}
+.card{
+  max-width:650px;margin:30px auto;padding:25px;
+  background:white;border:1px solid #e8e9f0;
+  border-radius:16px;box-shadow:0 8px 30px #18204410
+}
+h1{font-size:25px;margin:0 0 8px}
+.desc{font-size:13px;color:#777;margin-bottom:24px}
+label{display:block;font-size:13px;font-weight:bold;margin:17px 0 8px}
+textarea,input{
+  width:100%;padding:12px;border:1px solid #ddd;
+  border-radius:9px;font:13px Arial;outline:none
+}
+textarea{resize:vertical;min-height:115px}
+textarea:focus,input:focus{border-color:#8060e9}
+button,.link{
+  display:block;width:100%;padding:12px;
+  border:0;border-radius:8px;text-align:center;
+  font-weight:bold;font-size:13px;cursor:pointer
+}
+button{margin-top:16px;background:#7956df;color:white}
+button:hover{background:#6843cc}
+.results{margin-top:25px}
+.result{
+  padding:14px;margin-top:12px;
+  border:1px solid #e7e7ef;border-radius:10px
+}
+.result strong{display:block;margin-bottom:8px;font-size:13px}
+.result a{display:block;color:#7653d7;font-size:12px;overflow-wrap:anywhere}
+.copy{margin-top:10px;background:#edf0f8;color:#35364a}
+.note{margin-top:20px;font-size:11px;color:#888;line-height:1.6}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Access Link Builder</h1>
+  <p class="desc">Prototype pembuat URL dengan token demo non-autentikasi.</p>
+
+  <label for="token">Token demo</label>
+  <textarea id="token" placeholder="Masukkan TOKEN-DEMO-123"></textarea>
+
+  <button id="generate">Generate Demo Links</button>
+
+  <div id="results" class="results hidden">
+    <h3>Hasil URL Demo</h3>
+    <div class="result">
+      <strong>PC / Laptop</strong>
+      <a id="pc" href="#"></a>
+      <button class="copy" data-target="pc">Salin URL</button>
+    </div>
+    <div class="result">
+      <strong>HP</strong>
+      <a id="phone" href="#"></a>
+      <button class="copy" data-target="phone">Salin URL</button>
+    </div>
+    <div class="result">
+      <strong>TV</strong>
+      <a id="tv" href="#"></a>
+      <button class="copy" data-target="tv">Salin URL</button>
+    </div>
+  </div>
+
+  <p class="note">
+    Prototype ini hanya menghasilkan URL lokal simulasi, bukan tautan
+    login Netflix. Jangan memasukkan cookie atau token akun yang aktif.
+  </p>
 </div>
 
-<style>
-.cookie-upload {
-  margin: 18px 0;
-  padding: 14px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: #fafafa;
-}
-.cookie-upload label {
-  display: block;
-  margin-bottom: 10px;
-}
-.cookie-upload input {
-  display: block;
-  width: 100%;
-  font-size: 13px;
-}
-#fileStatus {
-  margin-bottom: 0;
-  font-size: 12px;
-  color: #666;
-}
-</style>
-
 <script>
-document.getElementById("cookieFile").addEventListener("change", async function () {
-  const file = this.files?.[0];
-  const status = document.getElementById("fileStatus");
+const demoBase = {
+  pc: "https://example.org/login?demo=",
+  phone: "https://example.org/unsupported?demo=",
+  tv: "https://example.org/tv8?demo="
+};
 
-  if (!file) {
-    status.textContent = "Belum ada file yang dipilih.";
+document.getElementById("generate").addEventListener("click", () => {
+  const token = document.getElementById("token").value.trim();
+
+  if (!token) {
+    alert("Masukkan token demo terlebih dahulu.");
     return;
   }
 
-  if (!file.name.toLowerCase().endsWith(".txt") || file.size > 100000) {
-    status.textContent = "Pilih file .txt maksimal 100 KB.";
-    this.value = "";
+  if (token.length > 500 || /[\r\n]/.test(token)) {
+    alert("Token demo tidak valid.");
     return;
   }
 
-  const text = await file.text();
-  const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.startsWith("#"));
-  const validFormat = lines.length > 0 && lines.every(line => line.split("\t").length === 7);
+  const encoded = encodeURIComponent(token);
 
-  status.textContent = validFormat
-    ? `Format Netscape terdeteksi: ${lines.length} baris. Cookie autentikasi tidak diproses.`
-    : "Format tidak dikenali. Pastikan file menggunakan format Netscape.";
+  for (const device of ["pc", "phone", "tv"]) {
+    const link = document.getElementById(device);
+    link.textContent = demoBase[device] + encoded;
+    link.href = "#";
+  }
+
+  document.getElementById("results").classList.remove("hidden");
+});
+
+document.querySelectorAll(".copy").forEach(button => {
+  button.addEventListener("click", async () => {
+    const text = document.getElementById(
+      button.dataset.target
+    ).textContent;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = "Tersalin!";
+      setTimeout(() => button.textContent = "Salin URL", 1500);
+    } catch {
+      alert("Pilih dan salin URL secara manual.");
+    }
+  });
 });
 </script>
+</body>
+</html>
