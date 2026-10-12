@@ -1,412 +1,72 @@
 
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#09090f">
-<title>NFTools — Streaming Utility</title>
+<div class="login-card">
+  <div class="message-header">Kuki Sukses Dikonversi, Bos!</div>
+
+  <h3>Hasil Demo:</h3>
+  <pre id="demoToken">DEMO-ACCESS-001</pre>
+
+  <p>Pilih perangkat untuk membuka Netflix resmi:</p>
+
+  <button onclick="openNetflix('phone')">Phone Login ↗</button>
+  <button onclick="openNetflix('pc')">PC/Laptop Login ↗</button>
+  <button onclick="openNetflix('tv')">TV Login ↗</button>
+
+  <p id="deviceStatus" aria-live="polite"></p>
+</div>
+
 <style>
-:root {
-  color-scheme:dark;
-  --bg:#09090f;--panel:#12121d;--panel2:#181827;
-  --border:#2b2b40;--text:#f5f5ff;--muted:#9999b4;
-  --purple:#8b5cf6;--light:#c4b5fd;--green:#4ade80;
+.login-card {
+  max-width: 520px;
+  margin: 24px auto;
+  padding: 18px;
+  border-radius: 14px;
+  background: #fff;
+  color: #222;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 5px 20px #0002;
 }
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:80px}
-body{
-  margin:0;background:radial-gradient(ellipse at 50% 0%,#241747,transparent 38%),var(--bg);
-  color:var(--text);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif
+.login-card h3 { margin-bottom: 8px; }
+.login-card pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: #159ec1;
+  font-size: 14px;
 }
-a{color:inherit;text-decoration:none}
-button,select,textarea{font:inherit}
-button,select{cursor:pointer}
-.topbar{
-  position:sticky;top:0;z-index:10;display:flex;align-items:center;
-  justify-content:space-between;gap:18px;padding:13px max(5%,calc((100% - 1100px)/2));
-  background:#09090ff2;backdrop-filter:blur(15px);border-bottom:1px solid #ffffff12
+.login-card button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 0;
+  border-radius: 7px;
+  background: #78ad76;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
 }
-.brand{display:flex;align-items:center;gap:9px;font-weight:850;letter-spacing:1px}
-.logo{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#a78bfa,#6d28d9)}
-nav{display:flex;gap:22px;color:var(--muted);font-size:12px}
-nav a:hover{color:white}
-.navbtn{padding:9px 13px;border:1px solid var(--border);border-radius:9px;font-size:12px}
-main{width:min(100% - 32px,1000px);margin:auto}
-.hero{text-align:center;padding:78px 0 55px;max-width:750px;margin:auto}
-.pill,.badge{display:inline-block;padding:5px 11px;border:1px solid #8b5cf644;border-radius:50px;background:#8b5cf615;color:var(--light);font-size:10px;font-weight:800;letter-spacing:1px}
-h1{font-size:clamp(42px,7vw,72px);line-height:1.08;letter-spacing:-3px;margin:23px 0 15px}
-h1 span{color:var(--light)}
-.hero p,.section-heading p,.about p{color:var(--muted)}
-.hero p{max-width:590px;margin:auto}
-.actions{display:flex;justify-content:center;flex-wrap:wrap;gap:11px;margin:25px 0}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:11px 16px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:white;font-size:12px;font-weight:750;transition:.2s}
-.btn:hover{transform:translateY(-1px);border-color:#8b5cf6}
-.btn.primary{background:linear-gradient(120deg,#8b5cf6,#6d43d8);border-color:transparent}
-.btn.full{width:100%}
-.notes{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
-.notes b{color:var(--green)}
-.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
-.stat,.panel{border:1px solid var(--border);border-radius:16px;background:linear-gradient(145deg,#151522,#101019)}
-.stat{padding:20px}
-.stat small{display:block;color:var(--muted);font-size:10px;letter-spacing:.7px;font-weight:750}
-.stat strong{display:block;font-size:29px;margin:5px 0}
-.stat .ico{color:var(--light);font-size:20px}
-section.content{padding-top:68px}
-.section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:19px}
-.eyebrow{color:var(--light);font-size:10px;font-weight:800;letter-spacing:1.5px}
-h2{font-size:30px;letter-spacing:-1px;line-height:1.2;margin:7px 0}
-.section-heading p{font-size:13px;margin:5px 0}
-.panel{padding:23px}
-.field{margin-bottom:21px;min-width:0}
-label{display:block;font-size:12px;font-weight:750;margin-bottom:8px}
-select,textarea{width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;background:#0b0b14;color:var(--text)}
-select{min-height:45px}
-textarea{display:block;resize:vertical;font:12px/1.7 ui-monospace,Consolas,monospace}
-textarea::placeholder{color:#686882}
-.devicegrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.device{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;min-height:115px;padding:13px;border:1px solid var(--border);border-radius:12px;background:#0c0c15;color:white;text-align:left}
-.device.active{border-color:var(--purple);background:#8b5cf61b;box-shadow:inset 0 0 0 1px #8b5cf622}
-.device .ico{font-size:25px;color:var(--light)}
-.device small{font-size:10px;color:var(--muted)}
-.notice,.privacy{display:flex;gap:12px;margin:20px 0;padding:14px;border:1px solid #8b5cf633;border-radius:11px;background:#8b5cf60a}
-.notice strong,.privacy strong{font-size:12px}
-.notice p,.privacy p{font-size:11px;color:var(--muted);margin:4px 0 0}
-.privacy{border-color:#4ade8030;background:#4ade8008}
-.result{margin-top:17px;padding:17px;border:1px solid #4ade8040;border-radius:12px;background:#4ade8008}
-.result h3{margin:0;font-size:14px}
-.result p{font-size:12px;color:var(--muted);margin:3px 0}
-.details{margin:15px 0}
-.details div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #ffffff10;font-size:12px}
-.details span:first-child{color:var(--muted)}
-.green{color:var(--green)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:6px;color:var(--muted);font-size:10px}
-.converter-actions{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:15px}
-.message{padding:12px;margin:12px 0;border:1px solid var(--border);border-radius:9px;font-size:12px;overflow-wrap:anywhere}
-.success{color:#86efac;border-color:#4ade8040}
-.error{color:#fda4af;border-color:#fb718540}
-.hidden{display:none!important}
-.about{max-width:730px;margin:auto;padding:65px 0}
-.about p{font-size:13px}
-.textlink{color:var(--light);font-size:13px;font-weight:700}
-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--border);padding:22px max(5%,calc((100% - 1100px)/2));color:var(--muted);font-size:10px}
-.toast{position:fixed;z-index:20;right:18px;bottom:18px;max-width:calc(100% - 36px);padding:12px 16px;border:1px solid var(--border);border-radius:10px;background:#201b30;opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s;font-size:12px}
-.toast.show{opacity:1;transform:translateY(0)}
-button:focus-visible,a:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--light);outline-offset:3px}
-@media(max-width:700px){
-  .topbar{padding:11px 14px}nav{display:none}.navbtn{margin-left:auto}
-  .hero{padding:60px 0 40px}h1{letter-spacing:-2px}
-  .stats{gap:8px}.stat{padding:12px}.stat small{font-size:8px}.stat strong{font-size:24px}
-  section.content{padding-top:50px}.panel{padding:16px}
-  .devicegrid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .device{min-height:105px}.grid2{gap:9px}
-  .section-heading{align-items:flex-start}h2{font-size:26px}
-  footer{padding:20px}
-}
-@media(max-width:390px){
-  .stats{grid-template-columns:1fr}
-  .stat{display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center}
-  .stat .ico{grid-row:span 2}.stat strong,.stat small{grid-column:2}
-  .grid2{grid-template-columns:1fr;gap:0}
-  .navbtn{font-size:10px;padding:8px}
-}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+.login-card button:hover { background: #5d965c; }
+#deviceStatus { font-size: 12px; color: #666; }
 </style>
-</head>
-<body>
-<header class="topbar">
-  <a href="#" class="brand"><span class="logo">NF</span> TOOLS<span style="color:#a78bfa">.</span></a>
-  <nav><a href="#generator">Generator Demo</a><a href="#converter">Converter</a><a href="#about">Tentang</a></nav>
-  <a class="navbtn" href="https://www.netflix.com/" target="_blank" rel="noopener noreferrer">Buka Netflix ↗</a>
-</header>
-
-<main>
-  <section class="hero">
-    <div class="pill">● STREAMING UTILITY LAB</div>
-    <h1>Streaming tools.<br><span>Made simple.</span></h1>
-    <p>Pilih wilayah dan perangkat, jalankan simulasi akses, atau ubah format data cookie generik secara lokal di browser.</p>
-    <div class="actions">
-      <a href="#generator" class="btn primary">Mulai Demo →</a>
-      <a href="#converter" class="btn">Buka Converter</a>
-    </div>
-    <div class="notes"><span><b>✓</b> Tanpa login</span><span><b>✓</b> Tanpa backend</span><span><b>✓</b> Lokal di browser</span></div>
-  </section>
-
-  <div class="stats">
-    <article class="stat"><span class="ico">◎</span><small>NEGARA TERSEDIA</small><strong id="countryCount">8</strong><small>Opsi demo</small></article>
-    <article class="stat"><span class="ico">▣</span><small>JENIS PERANGKAT</small><strong>4</strong><small>Profil tampilan</small></article>
-    <article class="stat"><span class="ico">↻</span><small>DEMO DIGUNAKAN</small><strong id="usageCount">0</strong><small>Sesi browser ini</small></article>
-  </div>
-
-  <section class="content" id="generator">
-    <div class="section-heading"><div><div class="eyebrow">01 / ACCESS SIMULATOR</div><h2>Access Demo</h2><p>Konfigurasikan simulasi perangkat pilihanmu.</p></div><span class="badge">DEMO MODE</span></div>
-    <div class="panel">
-      <div class="field">
-        <label for="country">Pilih wilayah</label>
-        <select id="country">
-          <option value="ID">🇮🇩 Indonesia</option><option value="US">🇺🇸 Amerika Serikat</option>
-          <option value="GB">🇬🇧 Inggris</option><option value="JP">🇯🇵 Jepang</option>
-          <option value="KR">🇰🇷 Korea Selatan</option><option value="SG">🇸🇬 Singapura</option>
-          <option value="PH">🇵🇭 Filipina</option><option value="IN">🇮🇳 India</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Pilih perangkat</label>
-        <div class="devicegrid" id="deviceGrid">
-          <button class="device active" data-device="phone" aria-pressed="true"><span class="ico">▯</span><span>Mobile</span><small>Android / iOS</small></button>
-          <button class="device" data-device="computer" aria-pressed="false"><span class="ico">▤</span><span>Komputer</span><small>Desktop / Laptop</small></button>
-          <button class="device" data-device="tv" aria-pressed="false"><span class="ico">▣</span><span>Smart TV</span><small>Layar televisi</small></button>
-          <button class="device" data-device="tablet" aria-pressed="false"><span class="ico">▯</span><span>Tablet</span><small>iPad / Android</small></button>
-        </div>
-      </div>
-      <div class="notice"><span>ⓘ</span><div><strong>Simulasi lokal, bukan token akses</strong><p>Demo tidak menghubungkan akun, memvalidasi langganan, atau membuat tautan autentikasi Netflix.</p></div></div>
-      <button class="btn primary full" id="runDemo">Jalankan Simulasi →</button>
-      <div class="result hidden" id="demoResult" aria-live="polite">
-        <h3>✓ Simulasi selesai</h3><p>Konfigurasi demo berhasil dibuat.</p>
-        <div class="details"><div><span>Wilayah</span><strong id="resultCountry">Indonesia</strong></div><div><span>Perangkat</span><strong id="resultDevice">Mobile</strong></div><div><span>Status</span><strong class="green">LOCAL DEMO</strong></div></div>
-        <a class="btn full" href="https://www.netflix.com/" target="_blank" rel="noopener noreferrer">Buka Netflix Resmi ↗</a>
-      </div>
-    </div>
-  </section>
-
-  <section class="content" id="converter">
-    <div class="section-heading"><div><div class="eyebrow">02 / LOCAL DATA TOOL</div><h2>Cookie Format Converter</h2><p>Konversi format cookie generik dari data contoh.</p></div><span class="badge">LOCAL ONLY</span></div>
-    <div class="panel">
-      <div class="privacy"><span>🔒</span><div><strong>Privasi diutamakan</strong><p>Gunakan hanya data non-sensitif. Cookie autentikasi, token sesi, dan cookie Netflix ditolak.</p></div></div>
-      <div class="grid2">
-        <div class="field"><label for="inputFormat">Format input</label><select id="inputFormat"><option value="json">JSON</option><option value="netscape">Netscape cookie text</option></select></div>
-        <div class="field"><label for="outputFormat">Format output</label><select id="outputFormat"><option value="netscape">Netscape cookie text</option><option value="json">JSON</option></select></div>
-      </div>
-      <div class="field"><label for="cookieInput">Data contoh</label><textarea id="cookieInput" rows="7" spellcheck="false" placeholder="Klik Isi Contoh untuk mencoba konverter..."></textarea><div class="meta"><span id="inputStatus">Tidak ada data</span><span>Domain contoh saja</span></div></div>
-      <div class="converter-actions"><button class="btn primary" id="convertButton">Konversi Lokal →</button><button class="btn" id="sampleButton">Isi Contoh</button><button class="btn" id="clearButton">Hapus</button></div>
-      <div id="converterMessage" class="message hidden" role="status"></div>
-      <div class="field" style="margin-bottom:0"><label for="cookieOutput">Hasil konversi</label><textarea id="cookieOutput" rows="7" readonly placeholder="Hasil konversi tampil di sini..."></textarea><button class="btn full" id="copyButton" style="margin-top:12px">Salin Hasil</button></div>
-    </div>
-  </section>
-
-  <section class="about" id="about">
-    <div class="eyebrow">03 / ABOUT</div><h2>Simple tools. Clear boundaries.</h2>
-    <p>Proyek demo mandiri. Simulasi hanya menghasilkan konfigurasi lokal dan converter hanya menerima data generik dari domain contoh. Tidak ada koneksi ke akun Netflix.</p>
-    <a class="textlink" href="https://help.netflix.com/" target="_blank" rel="noopener noreferrer">Pusat Bantuan Netflix Resmi ↗</a>
-  </section>
-</main>
-
-<footer><a class="brand" href="#"><span class="logo">NF</span> TOOLS.</a><span>Independent demo · Not affiliated with Netflix.</span><span>© <span id="year"></span> NFTools Clone</span></footer>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
-"use strict";
-const $ = s => document.querySelector(s);
-const countryNames = {
-  ID:"Indonesia",US:"Amerika Serikat",GB:"Inggris",JP:"Jepang",
-  KR:"Korea Selatan",SG:"Singapura",PH:"Filipina",IN:"India"
-};
-const deviceNames = {
-  phone:"Mobile",computer:"Komputer",tv:"Smart TV",tablet:"Tablet"
-};
-const allowedDomains = new Set(["example.org","example.com","example.net"]);
-const sensitiveName = /auth|session|token|credential|password|passwd|jwt|sid|csrf|xsrf|netflix|login|bearer|refresh|access.?key/i;
-let selectedDevice = "phone";
-let usageCount = 0;
-let toastTimer;
+function openNetflix(device) {
+  const messages = {
+    phone: "Netflix resmi dibuka untuk perangkat mobile.",
+    pc: "Netflix resmi dibuka untuk komputer.",
+    tv: "Buka aplikasi Netflix di Smart TV kamu."
+  };
 
-$("#year").textContent = new Date().getFullYear();
-$("#countryCount").textContent = Object.keys(countryNames).length;
+  document.getElementById("deviceStatus").textContent =
+    messages[device];
 
-function toast(message) {
-  const el = $("#toast");
-  el.textContent = message;
-  el.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove("show"),2600);
-}
-function message(text,type="success") {
-  const el = $("#converterMessage");
-  el.textContent = text;
-  el.className = "message " + type;
-}
-function hideMessage() {
-  $("#converterMessage").textContent = "";
-  $("#converterMessage").className = "message hidden";
-}
-
-$("#deviceGrid").addEventListener("click",e=>{
-  const btn = e.target.closest("[data-device]");
-  if(!btn)return;
-  selectedDevice = btn.dataset.device;
-  document.querySelectorAll("[data-device]").forEach(item=>{
-    const active = item.dataset.device === selectedDevice;
-    item.classList.toggle("active",active);
-    item.setAttribute("aria-pressed",String(active));
-  });
-  $("#demoResult").classList.add("hidden");
-});
-
-$("#runDemo").addEventListener("click",()=>{
-  const country = $("#country").value;
-  if(!Object.hasOwn(countryNames,country) ||
-     !Object.hasOwn(deviceNames,selectedDevice)){
-    toast("Pilihan tidak valid.");return;
+  if (device === "tv") {
+    return;
   }
-  $("#resultCountry").textContent = countryNames[country];
-  $("#resultDevice").textContent = deviceNames[selectedDevice];
-  $("#demoResult").classList.remove("hidden");
-  $("#usageCount").textContent = ++usageCount;
-  toast("Simulasi lokal berhasil.");
-});
 
-function validateCookie(c) {
-  if(!c || typeof c!=="object" || Array.isArray(c))
-    throw Error("Item harus berupa objek cookie.");
-
-  if(typeof c.domain!=="string")
-    throw Error("Domain harus berupa teks.");
-
-  const domain = c.domain.toLowerCase().replace(/^\./,"");
-  if(!allowedDomains.has(domain))
-    throw Error("Domain tidak diizinkan. Gunakan example.org, example.com, atau example.net.");
-
-  if(typeof c.name!=="string" || !/^[a-zA-Z0-9_-]{1,100}$/.test(c.name))
-    throw Error("Nama cookie tidak valid.");
-
-  if(sensitiveName.test(c.name))
-    throw Error("Nama cookie terdeteksi sensitif dan ditolak.");
-
-  if(typeof c.value!=="string" || c.value.length>2000 ||
-     /[\u0000-\u001f\u007f]/.test(c.value))
-    throw Error("Nilai cookie tidak valid.");
-
-  if(typeof c.path!=="string" || !c.path.startsWith("/") ||
-     /[\r\n\t]/.test(c.path))
-    throw Error("Path cookie tidak valid.");
-
-  const secure = c.secure ?? false;
-  const httpOnly = c.httpOnly ?? false;
-  const expires = c.expires ?? 0;
-
-  if(typeof secure!=="boolean" || typeof httpOnly!=="boolean")
-    throw Error("secure dan httpOnly harus berupa boolean.");
-
-  if(typeof expires!=="number" || !Number.isFinite(expires) || expires<0)
-    throw Error("expires harus berupa angka non-negatif.");
-
-  return {domain,name:c.name,value:c.value,path:c.path,secure,httpOnly,expires};
+  window.open(
+    "https://www.netflix.com/",
+    "_blank",
+    "noopener,noreferrer"
+  );
 }
-
-function parseJson(text) {
-  let data;
-  try { data=JSON.parse(text); }
-  catch { throw Error("JSON tidak valid. Periksa tanda kutip dan koma."); }
-  if(!Array.isArray(data))throw Error("JSON harus berupa array objek cookie.");
-  if(data.length>100)throw Error("Maksimal 100 item.");
-  return data.map(validateCookie);
-}
-
-function parseNetscape(text) {
-  const result=[];
-  for(const [i,line] of text.split(/\r?\n/).entries()){
-    if(!line.trim() || line.startsWith("#"))continue;
-    const f=line.split("\t");
-    if(f.length!==7)
-      throw Error("Baris "+(i+1)+": diperlukan 7 kolom dipisahkan TAB.");
-    const [domain,sub,path,secure,expires,name,value]=f;
-    if(!["TRUE","FALSE"].includes(sub.toUpperCase()) ||
-       !["TRUE","FALSE"].includes(secure.toUpperCase()))
-      throw Error("Baris "+(i+1)+": flag TRUE/FALSE tidak valid.");
-    if(!/^\d+$/.test(expires))
-      throw Error("Baris "+(i+1)+": expires tidak valid.");
-    result.push(validateCookie({
-      domain,path,secure:secure.toUpperCase()==="TRUE",
-      httpOnly:false,expires:Number(expires),name,value
-    }));
-    if(result.length>100)throw Error("Maksimal 100 item.");
-  }
-  if(!result.length)throw Error("Tidak ada baris cookie yang valid.");
-  return result;
-}
-
-function toNetscape(items) {
-  return [
-    "# Netscape HTTP Cookie File",
-    "# Generic demonstration data only.",
-    "# Not for account authentication.",
-    ...items.map(c=>[
-      c.domain,"FALSE",c.path,c.secure?"TRUE":"FALSE",
-      String(Math.floor(c.expires)),c.name,c.value
-    ].join("\t"))
-  ].join("\n");
-}
-
-function convert() {
-  hideMessage();
-  $("#cookieOutput").value="";
-  const text=$("#cookieInput").value.trim();
-  if(!text){message("Masukkan data contoh terlebih dahulu.","error");return;}
-  if(text.length>50000){message("Input melebihi batas 50 KB.","error");return;}
-
-  try {
-    const items=$("#inputFormat").value==="json"
-      ?parseJson(text):parseNetscape(text);
-    $("#cookieOutput").value=$("#outputFormat").value==="json"
-      ?JSON.stringify(items,null,2):toNetscape(items);
-    message(items.length+" item dikonversi lokal. Tidak ada data yang diunggah.");
-  } catch(err) {
-    $("#cookieOutput").value="";
-    message(err.message||"Konversi gagal.","error");
-  }
-}
-$("#convertButton").addEventListener("click",convert);
-
-const sample = [
-  {domain:"example.org",name:"theme",value:"dark",path:"/",secure:true,httpOnly:false,expires:0},
-  {domain:"example.com",name:"language",value:"id",path:"/",secure:true,httpOnly:false,expires:0}
-];
-
-$("#sampleButton").addEventListener("click",()=>{
-  $("#inputFormat").value="json";
-  $("#outputFormat").value="netscape";
-  $("#cookieInput").value=JSON.stringify(sample,null,2);
-  $("#cookieOutput").value="";
-  $("#inputStatus").textContent="Contoh siap dikonversi";
-  hideMessage();
-  toast("Data contoh dimasukkan.");
-});
-
-$("#clearButton").addEventListener("click",()=>{
-  $("#cookieInput").value="";
-  $("#cookieOutput").value="";
-  $("#inputStatus").textContent="Tidak ada data";
-  hideMessage();
-  toast("Input dan hasil dihapus.");
-});
-
-$("#cookieInput").addEventListener("input",()=>{
-  const n=$("#cookieInput").value.length;
-  $("#inputStatus").textContent=n?n.toLocaleString("id-ID")+" karakter":"Tidak ada data";
-});
-
-$("#copyButton").addEventListener("click",async()=>{
-  const value=$("#cookieOutput").value;
-  if(!value){toast("Tidak ada hasil untuk disalin.");return;}
-  try {
-    if(!navigator.clipboard || !window.isSecureContext)throw Error();
-    await navigator.clipboard.writeText(value);
-    toast("Hasil berhasil disalin.");
-  } catch {
-    const temp=document.createElement("textarea");
-    temp.value=value;
-    temp.setAttribute("readonly","");
-    temp.style.position="fixed";
-    temp.style.opacity="0";
-    document.body.appendChild(temp);
-    temp.select();
-    let ok=false;
-    try {ok=document.execCommand("copy");}catch{}
-    temp.remove();
-    toast(ok?"Hasil berhasil disalin.":"Salin manual dengan Ctrl+C.");
-  }
-});
 </script>
-</body>
-</html>
