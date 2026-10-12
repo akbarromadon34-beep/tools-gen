@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Platform Cookie to Bookmarklet Generator</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #151d30;
+            --text-color: #f1f5f9;
+            --primary: #3b82f6;
+            --primary-hover: #1d4ed8;
+            --accent: #10b981;
+            --border: #1e293b;
+            --input-bg: #090d16;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 750px;
+            border: 1px solid #27354f;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #fff;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+
+        select {
+            width: 100%;
+            background-color: var(--input-bg);
+            color: #fff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+            transition: border 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--primary);
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            background-color: var(--input-bg);
+            color: #38bdf8;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            box-sizing: border-box;
+            resize: vertical;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button:active {
+            transform: scale(0.99);
+        }
+
+        .result-box {
+            margin-top: 30px;
+            padding: 25px;
+            background-color: var(--input-bg);
+            border-radius: 12px;
+            border: 2px dashed #27354f;
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bookmark-btn {
+            display: inline-block;
+            background-color: var(--accent);
+            color: white;
+            padding: 12px 28px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: move;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+            margin-bottom: 20px;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .bookmark-btn:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            text-align: left;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.6;
+            background: #151d30;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .instructions ol {
+            margin: 5px 0 0 0;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Multi-Platform Cookie Generator</h2>
+    <p class="subtitle">Ubah cookie Netscape dari berbagai platform menjadi tombol login instan.</p>
+    
+    <div class="form-group">
+        <label for="platformSelect">Pilih Platform Target (Atau biarkan 'Deteksi Otomatis')</label>
+        <select id="platformSelect">
+            <option value="auto">🔍 Deteksi Otomatis dari File Cookie</option>
+            <option value="primevideo.com">📦 Amazon Prime Video</option>
+            <option value="netflix.com">🎬 Netflix</option>
+            <option value="disneyplus.com">👑 Disney+ / Disney+ Hotstar</option>
+            <option value="crunchyroll.com">🍣 Crunchyroll</option>
+            <option value="max.com">🎭 Max (HBO Max)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="cookieInput">Tempel Teks File Cookie (Format Netscape)</label>
+        <textarea id="cookieInput" placeholder="# Netscape HTTP Cookie File&#10;.netflix.com	TRUE	/	TRUE..."></textarea>
+    </div>
+
+    <button onclick="generateBookmarklet()">Generate Tautan Akses</button>
+
+    <div id="resultBox" class="result-box">
+        <p style="color: #94a3b8; margin-top: 0; font-size: 0.95rem; margin-bottom: 15px;">👇 Tarik (drag) tombol hijau ini langsung ke <strong>Bookmarks Bar</strong> browser Anda:</p>
+        <a id="bookmarkletLink" class="bookmark-btn" href="#">Tombol Akses</a>
+        
+        <div class="instructions">
+            <strong>Cara Penggunaan:</strong>
+            <ol>
+                <li>Tarik tombol hijau di atas dan lepaskan di bilah favorit (bookmarks bar) browser Anda.</li>
+                <li>Buka browser seperti biasa (pastikan Anda sedang tidak login di akun lain pada platform tersebut).</li>
+                <li>Klik tombol bookmark baru Anda, peramban akan menyuntikkan cookie dan langsung login secara instan.</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<script>
+function parseNetscapeCookie(text, selectedPlatform) {
+    const lines = text.split('\n');
+    const cookies = [];
+    let domainDetected = "netflix.com"; // Default fallback awal jika gagal deteksi
+
+    lines.forEach(line => {
+        if (!line.trim() || line.startsWith('#')) return;
+        
+        const parts = line.split('\t');
+        if (parts.length >= 7) {
+            const domain = parts[0].trim();
+            const name = parts[4].trim();
+            const value = parts[5].trim();
+            const secure = parts[3].trim().toUpperCase() === 'TRUE';
+            
+            // Logika deteksi otomatis domain utama jika pilihan adalah 'auto'
+            if (selectedPlatform === 'auto') {
+                if (domain.includes("primevideo.com")) domainDetected = "primevideo.com";
+                else if (domain.includes("netflix.com")) domainDetected = "netflix.com";
+                else if (domain.includes("disneyplus.com") || domain.includes("hotstar.com")) domainDetected = "disneyplus.com";
+                else if (domain.includes("crunchyroll.com")) domainDetected = "crunchyroll.com";
+                else if (domain.includes("max.com") || domain.includes("hbomax.com")) domainDetected = "max.com";
+            }
+
+            cookies.push({
+                n: name,
+                v: value,
+                d: domain,
+                s: secure
+            });
+        }
+    });
+
+    // Jika pengguna memilih manual, timpa hasil deteksi otomatis
+    if (selectedPlatform !== 'auto') {
+        domainDetected = selectedPlatform;
+    }
+
+    return { cookies, domainDetected };
+}
+
+function generateBookmarklet() {
+    const inputText = document.getElementById('cookieInput').value;
+    const selectedPlatform = document.getElementById('platformSelect').value;
+
+    if (!inputText.trim()) {
+        alert('Maaf, silakan tempelkan data cookie Anda terlebih dahulu!');
+        return;
+    }
+
+    const { cookies, domainDetected } = parseNetscapeCookie(inputText, selectedPlatform);
+    
+    if (cookies.length === 0) {
+        alert('Format teks tidak valid. Pastikan Anda menempelkan teks cookie berformat Netscape HTTP.');
+        return;
+    }
+
+    // Mengubah data menjadi JSON terkompresi
+    const jsonString = JSON.stringify(cookies);
+    
+    // Menyusun generator injeksi JavaScript dinamis berdasarkan domain target
+    const code = `javascript:(function(){var c=${jsonString};c.forEach(function(i){var e=i.n+"="+i.v+"; path=/; domain="+i.d;if(i.s){e+="; secure"}document.cookie=e;});window.location.href="https://www.${domainDetected}/";})();`;
+
+    // Visualisasi hasil pada tombol enkapsulasi tautan
+    const linkEl = document.getElementById('bookmarkletLink');
+    linkEl.href = code;
+    
+    // Memberikan label nama tombol dinamis yang rapi
+    let platformName = domainDetected.split('.')[0].toUpperCase();
+    if(platformName === "PRIMEVIDEO") platformName = "PRIME VIDEO";
+    linkEl.innerText = `👉 MASUK ${platformName}`;
+    
+    // Menampilkan komponen kotak hasil
+    document.getElementById('resultBox').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
